@@ -130,33 +130,47 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         String url = params[0];
         long totalSize = 0;
 
+        List<URLFilter> filters = new ArrayList<>();
+        filters.add(new WeChatFilter());
+        filters.add(new ThePaperFilter());
+        filters.add(new ThePaperClientFilter());
+
+        URLFilter filter = null;
+        for (URLFilter f : filters) {
+            if (f.canParse(url)) {
+                filter = f;
+                url = filter.getURL(url);
+                break;
+            }
+        }
+
+        if (filter == null)
+            return "[Error] Invalid url: " + url;
+
+        publishProgress("Found " + filter.getType() + " link.");
+
         publishProgress("Connecting to the Web host...");
         Document doc = null;
         try {
             doc = Jsoup.connect(url).get();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return "[Error] Malformed URL: " + url;
         } catch (IOException e) {
             e.printStackTrace();
             return "[Error] Failed to fetch " + url;
         }
 
-        String title = null;
-        String bodyInner = null;
-
-        if (url.startsWith("https://mp.weixin.qq.com")) {
-            publishProgress("Found WeChat article link.");
-
-            Element titleEle = doc.getElementById("activity-name");
-            if (titleEle == null)
-                return "[Error] Cannot find the title element.";
-            title = titleEle.text();
-
-            Element bodyEle = doc.getElementById("js_content");
-            if (bodyEle == null)
-                return "[Error] Cannot find the body element.";
-            bodyInner = bodyEle.html();
-        } else {
-            return "[Error] Unknown type of link " + url;
+        String title;
+        String bodyInner;
+        try {
+            title = filter.getTitle(doc);
+            bodyInner = filter.getBodyInner(doc);
+        } catch (URLFilter.InvalidDocumentException e) {
+            e.printStackTrace();
+            return "[Error] " + e.getMessage();
         }
+
         publishProgress("Title: " + title);
 
         List<Resource> resources = new ArrayList<>();
