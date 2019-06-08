@@ -30,6 +30,7 @@ import org.jsoup.select.Elements;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -144,8 +145,10 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
             }
         }
 
-        if (filter == null)
+        if (filter == null) {
+            System.err.println("invalid url=" + url);
             return "[Error] Invalid url: " + url;
+        }
 
         publishProgress("Found " + filter.getType() + " link.");
 
@@ -230,10 +233,13 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
                 }
                 in.close();
                 out.close();
-
+            } catch (MalformedURLException e1) {
+                return "[Error] Malformed URL: " + imgURL + ".\nThe element is "
+                        + e;
             } catch (IOException e1) {
                 e1.printStackTrace();
-                return "[Error] IOException during fetching " + imgURL;
+                return "[Error] IOException during fetching " + imgURL + ".\nThe element is "
+                        + e;
             }
 
             publishProgress(imgURL + " has been downloaded.");
