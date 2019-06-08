@@ -128,6 +128,7 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
     @Override
     protected String doInBackground(String... params) {
         String url = params[0];
+        long totalSize = 0;
 
         publishProgress("Connecting to the Web host...");
         Document doc = null;
@@ -237,6 +238,8 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
             d.setBodyHash(hashb);
             d.setBody(bodyb);
 
+            totalSize += bodyb.length;
+
             Resource r = new Resource();
             r.setData(d);
 
@@ -309,6 +312,7 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
             n.setAttributes(new NoteAttributes());
         }
         n.getAttributes().setSourceURL(url);
+        n.getAttributes().setSource("xywang-app");
 
         String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
@@ -316,8 +320,9 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
                 + noteBody
                 + "</en-note>";
         n.setContent(content);
+        totalSize += content.length();
 
-        publishProgress("Creating the note...");
+        publishProgress("The estimated size is " + totalSize + " bytes. Creating the note...");
         try {
             client.createNote(n);
         } catch (TException e) {
