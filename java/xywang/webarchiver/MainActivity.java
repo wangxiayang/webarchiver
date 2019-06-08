@@ -135,6 +135,9 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         filters.add(new WeChatFilter());
         filters.add(new ThePaperFilter());
         filters.add(new ThePaperClientFilter());
+        filters.add(new ZhihuFilter());
+        filters.add(new ZhihuClientFilter());
+        filters.add(new LTNFilter());
 
         URLFilter filter = null;
         for (URLFilter f : filters) {
@@ -203,17 +206,16 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
 
             String imgURL = null;
 
-            if (e.hasAttr("src")
-                    && !e.hasAttr("data-src")) {
-                enew.attr("src", e.attr("src"));
-                imgURL = e.attr("src");
-            } else if (e.hasAttr("data-src")
-                    && !e.hasAttr("src")) {
+            if (e.hasAttr("data-actualsrc")) {
+                enew.attr("src", e.attr("data-actualsrc"));
+                imgURL = e.attr("data-actualsrc");
+            } else if (e.hasAttr("data-src")) {
                 enew.attr("src", e.attr("data-src"));
                 imgURL = e.attr("data-src");
-            } else if (e.hasAttr("src")
-                    && enew.hasAttr("data-src")) {
-                publishProgress("[Warning] Both src appear: " + e.html());
+            } else if (e.hasAttr("data-original")) {
+                enew.attr("src", e.attr("data-original"));
+                imgURL = e.attr("data-original");
+            } else if (e.hasAttr("src")) {
                 enew.attr("src", e.attr("src"));
                 imgURL = e.attr("src");
             } else {
@@ -300,6 +302,18 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         }
 
         Document cleandoc = getCleaner().clean(bodyDoc);
+
+        /* remove invalid href value */
+        Elements aes = cleandoc.getElementsByTag("a");
+        for (Element e : aes) {
+            if (!e.hasAttr("href"))
+                continue;
+
+            String v = e.attr("href");
+            if (v.equals("javascript:void(0);"))
+                e.attr("href", url);
+        }
+
         Document.OutputSettings os = cleandoc.outputSettings();
         /* pretty-printing self-closing tags */
         os.syntax(Document.OutputSettings.Syntax.xml);
