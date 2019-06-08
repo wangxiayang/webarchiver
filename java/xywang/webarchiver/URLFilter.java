@@ -199,3 +199,47 @@ class LTNFilter extends URLFilter {
         return bodyes.html();
     }
 }
+
+class PTTFilter extends URLFilter {
+
+    PTTFilter() {
+        super("PTT");
+    }
+
+    @Override
+    boolean canParse(String url) {
+        return url.startsWith("https://www.ptt.cc/bbs");
+    }
+
+    @Override
+    String getURL(String url) {
+        return url;
+    }
+
+    @Override
+    String getTitle(Document doc) throws InvalidDocumentException {
+        Elements htmls = doc.getElementsByTag("html");
+        if (htmls.size() != 1)
+            throw new InvalidDocumentException("Cannot locate the title element.");
+        Element htmle = htmls.first();
+
+        for (Element e: htmle.children()) {
+            if (e.tagName().equals("head")) {
+                for (Element inhead: e.children()) {
+                    if (inhead.tagName().equals("title"))
+                        return inhead.text();
+                }
+            }
+        }
+
+        throw new InvalidDocumentException("Cannot locate the title element.");
+    }
+
+    @Override
+    String getBodyInner(Document doc) throws InvalidDocumentException {
+        Element bodye = doc.getElementById("main-container");
+        if (bodye == null)
+            throw new InvalidDocumentException("Cannot find the body element.");
+        return bodye.html();
+    }
+}

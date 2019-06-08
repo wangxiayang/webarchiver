@@ -138,6 +138,7 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         filters.add(new ZhihuFilter());
         filters.add(new ZhihuClientFilter());
         filters.add(new LTNFilter());
+        filters.add(new PTTFilter());
 
         URLFilter filter = null;
         for (URLFilter f : filters) {
@@ -222,6 +223,15 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
                 return "[Error] Cannot decide image source: " + e.html();
             }
 
+            /* handle relative path */
+            if (imgURL.startsWith("/")) {
+                String hostname = url.substring(8);
+                int slashIdx = hostname.indexOf("/");
+                hostname = hostname.substring(0, slashIdx);
+                imgURL = "https://" + hostname + imgURL;
+                enew.attr("src", imgURL);
+            }
+
             publishProgress("[" + idx + "/" + es.size() + "] Downloading " + imgURL + ".");
 
             ByteArrayOutputStream out;
@@ -267,13 +277,14 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
 
             String mime;
             String suffix;
-            if (imgURL.endsWith("jpg") || imgURL.endsWith("jpeg")) {
+            if (imgURL.contains(".jpg")
+                    || imgURL.contains(".jpeg")) {
                 mime = "image/jpeg";
                 suffix = "jpeg";
-            } else if (imgURL.endsWith("png")) {
+            } else if (imgURL.contains(".png")) {
                 mime = "image/png";
                 suffix = "png";
-            } else if (imgURL.endsWith("gif")) {
+            } else if (imgURL.contains(".gif")) {
                 mime = "image/gif";
                 suffix = "gif";
             } else {
