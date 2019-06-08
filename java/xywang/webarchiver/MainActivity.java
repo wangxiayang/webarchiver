@@ -139,6 +139,7 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         filters.add(new ZhihuClientFilter());
         filters.add(new LTNFilter());
         filters.add(new PTTFilter());
+        filters.add(new DefaultFilter());
 
         URLFilter filter = null;
         for (URLFilter f : filters) {
