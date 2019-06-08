@@ -279,13 +279,21 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
             String mime;
             String suffix;
             if (imgURL.contains(".jpg")
-                    || imgURL.contains(".jpeg")) {
+                    || imgURL.contains(".jpeg")
+                    || imgURL.contains("=jpg")
+                    || imgURL.contains("_jpg")
+                    || imgURL.contains("=jpeg")
+                    || imgURL.contains("_jpeg")) {
                 mime = "image/jpeg";
                 suffix = "jpeg";
-            } else if (imgURL.contains(".png")) {
+            } else if (imgURL.contains(".png")
+                    || imgURL.contains("=png")
+                    || imgURL.contains("_png")) {
                 mime = "image/png";
                 suffix = "png";
-            } else if (imgURL.contains(".gif")) {
+            } else if (imgURL.contains(".gif")
+                    || imgURL.contains("=gif")
+                    || imgURL.contains("_gif")) {
                 mime = "image/gif";
                 suffix = "gif";
             } else {
