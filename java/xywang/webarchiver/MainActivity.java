@@ -16,6 +16,7 @@ import com.evernote.edam.error.EDAMUserException;
 import com.evernote.edam.type.Data;
 import com.evernote.edam.type.Note;
 import com.evernote.edam.type.NoteAttributes;
+import com.evernote.edam.type.Notebook;
 import com.evernote.edam.type.Resource;
 import com.evernote.edam.type.ResourceAttributes;
 import com.evernote.thrift.TException;
@@ -341,11 +342,21 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         publishProgress("Connecting to Evernote...");
         String noteBody = cleandoc.getElementsByTag("body").html();
         /* upload note */
-        EvernoteAuth auth = new EvernoteAuth(EvernoteService.SANDBOX, Config.TOKEN);
+        EvernoteAuth auth = new EvernoteAuth(EvernoteService.PRODUCTION, Config.TOKEN);
         ClientFactory factory = new ClientFactory(auth);
         NoteStoreClient client;
+        Notebook notebook = null;
         try {
             client = factory.createNoteStoreClient();
+
+            if (!"Fill the notebook name here".equals(Config.NOTEBOOK_NAME)) {
+                for (Notebook nb : client.listNotebooks()) {
+                    if (nb.getName().equals(Config.NOTEBOOK_NAME)) {
+                        notebook = nb;
+                        break;
+                    }
+                }
+            }
         } catch (EDAMUserException e) {
             e.printStackTrace();
             return "[Error] Evernote user exception: " + e.getMessage() + ".";
@@ -359,6 +370,8 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
 
         Note n = new Note();
         n.setTitle(title);
+        if (notebook != null)
+            n.setNotebookGuid(notebook.getGuid());
         for (Resource r : resources) {
             n.addToResources(r);
         }
