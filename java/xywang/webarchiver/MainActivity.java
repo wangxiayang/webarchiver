@@ -310,7 +310,7 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
                 continue;
 
             String v = e.attr("href");
-            if (v.equals("javascript:void(0);"))
+            if (!v.startsWith("https://"))
                 e.attr("href", url);
         }
 
