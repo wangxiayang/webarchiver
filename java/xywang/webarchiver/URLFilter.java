@@ -115,3 +115,87 @@ class ThePaperClientFilter extends ThePaperFilter {
         return super.getBodyInner(doc);
     }
 }
+
+class ZhihuFilter extends URLFilter {
+
+    ZhihuFilter() {
+        super("Zhihu");
+    }
+
+    @Override
+    boolean canParse(String url) {
+        return url.startsWith("https://www.zhihu.com/question/");
+    }
+
+    @Override
+    String getURL(String url) {
+        return url;
+    }
+
+    @Override
+    String getTitle(Document doc) throws InvalidDocumentException {
+        Elements titlees = doc.getElementsByClass("QuestionHeader-title");
+        if (titlees.size() != 1)
+            throw new InvalidDocumentException("Cannot locate the title element.");
+        return titlees.first().text();
+    }
+
+    @Override
+    String getBodyInner(Document doc) throws InvalidDocumentException {
+        Elements bodyes = doc.getElementsByClass("RichContent-inner");
+        if (bodyes.size() != 1)
+            throw new InvalidDocumentException("Cannot locate the body element.");
+        return bodyes.html();
+    }
+}
+
+class ZhihuClientFilter extends ZhihuFilter {
+    @Override
+    boolean canParse(String url) {
+        return url.endsWith("（分享自知乎网）");
+    }
+
+    @Override
+    String getURL(String url) {
+        return url.substring(url.indexOf("https://www.zhihu.com/question/"));
+    }
+}
+
+class LTNFilter extends URLFilter {
+
+    LTNFilter() {
+        super("Liberty Times");
+    }
+
+    @Override
+    boolean canParse(String url) {
+        return url.startsWith("https://news.ltn.com.tw/news/");
+    }
+
+    @Override
+    String getURL(String url) {
+        return url;
+    }
+
+    @Override
+    String getTitle(Document doc) throws InvalidDocumentException {
+        Elements titlePrts = doc.getElementsByClass("whitecon articlebody");
+        if (titlePrts.size() != 1)
+            throw new InvalidDocumentException("Cannot locate the title element.");
+
+        Element titlePrt = titlePrts.first();
+        for (Element e : titlePrt.children()) {
+            if (e.tagName().equals("h1"))
+                return e.text();
+        }
+        throw new InvalidDocumentException("Cannot locate the title element.");
+    }
+
+    @Override
+    String getBodyInner(Document doc) throws InvalidDocumentException {
+        Elements bodyes = doc.getElementsByAttributeValue("itemprop", "articleBody");
+        if (bodyes.size() != 1)
+            throw new InvalidDocumentException("Cannot locate the body element.");
+        return bodyes.html();
+    }
+}
