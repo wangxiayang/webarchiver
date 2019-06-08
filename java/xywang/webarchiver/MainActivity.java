@@ -336,7 +336,18 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
         n.setContent(content);
         totalSize += content.length();
 
-        publishProgress("The estimated size is " + totalSize + " bytes. Creating the note...");
+        String sizeString = null;
+        if (totalSize < 1024) {
+            sizeString = totalSize + " bytes";
+        } else if (totalSize < 1024 * 1024) {
+            sizeString = (totalSize / 1024) + "KB";
+        } else if (totalSize < 1024 * 1024 * 1024) {
+            sizeString = (totalSize / 1024 / 1024) + "MB";
+        } else {
+            sizeString = " larger than 1GB";
+        }
+
+        publishProgress("The estimated size is " + sizeString + ". Creating the note...");
         try {
             client.createNote(n);
         } catch (TException e) {
