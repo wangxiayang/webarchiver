@@ -222,7 +222,8 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
                 enew.attr("src", e.attr("src"));
                 imgURL = e.attr("src");
             } else {
-                return "[Error] Cannot decide image source: " + e.html();
+                publishProgress("[Warning] Cannot decide image source: " + e.html());
+                continue;
             }
 
             /* handle relative path */

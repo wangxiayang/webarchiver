@@ -135,29 +135,63 @@ class ZhihuFilter extends URLFilter {
     @Override
     String getTitle(Document doc) throws InvalidDocumentException {
         Elements titlees = doc.getElementsByClass("QuestionHeader-title");
-        if (titlees.size() != 1)
+        if (titlees.size() != 1) {
+            Elements htmls = doc.getElementsByTag("html");
+            if (htmls.size() != 1)
+                throw new InvalidDocumentException("Cannot locate the title element.");
+            Element htmle = htmls.first();
+            for (Element e : htmle.children()) {
+                if (e.tagName().equals("head")) {
+                    for (Element headchild : e.children()) {
+                        if (headchild.tagName().equals("title"))
+                            return headchild.text();
+                    }
+                }
+            }
             throw new InvalidDocumentException("Cannot locate the title element.");
+        }
         return titlees.first().text();
     }
 
     @Override
     String getBodyInner(Document doc) throws InvalidDocumentException {
         Elements bodyes = doc.getElementsByClass("RichContent-inner");
-        if (bodyes.size() != 1)
-            throw new InvalidDocumentException("Cannot locate the body element.");
-        return bodyes.html();
+        if (bodyes.size() != 1) {
+            bodyes = doc.getElementsByClass("Post-RichTextContainer");
+            if (bodyes.size() != 1) {
+                Elements htmls = doc.getElementsByTag("html");
+                if (htmls.size() != 1)
+                    throw new InvalidDocumentException("Cannot locate the body element.");
+                Element htmle = htmls.first();
+                for (Element e : htmle.children()) {
+                    if (e.tagName().equals("body")) {
+                        return e.html();
+                    }
+                }
+                throw new InvalidDocumentException("Cannot locate the body element.");
+            } else {
+                return bodyes.first().html();
+            }
+        }
+        return bodyes.first().html();
     }
 }
 
 class ZhihuClientFilter extends ZhihuFilter {
     @Override
     boolean canParse(String url) {
-        return url.endsWith("（分享自知乎网）");
+        return url.contains("（分享自知乎网）");
     }
 
     @Override
     String getURL(String url) {
-        return url.substring(url.indexOf("https://www.zhihu.com/question/"));
+        int idx = url.indexOf("https://www.zhihu.com/question/");
+        if (idx == -1)
+            idx = url.indexOf("https://zhuanlan.zhihu.com/");
+        else
+            idx = url.indexOf("https://");
+
+        return url.substring(idx);
     }
 }
 
