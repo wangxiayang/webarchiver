@@ -278,6 +278,39 @@ class PTTFilter extends URLFilter {
     }
 }
 
+class HeritageFilter extends URLFilter {
+
+    HeritageFilter() {
+        super("The Heritage");
+    }
+
+    @Override
+    boolean canParse(String url) {
+        return url.startsWith("https://www.heritage.org");
+    }
+
+    @Override
+    String getURL(String url) {
+        return url;
+    }
+
+    @Override
+    String getTitle(Document doc) throws InvalidDocumentException {
+        Elements elements = doc.getElementsByClass("commentary__headline headline");
+        if (elements.size() != 1)
+            throw new InvalidDocumentException("Cannot find the title element");
+        return elements.first().text();
+    }
+
+    @Override
+    String getBodyInner(Document doc) throws InvalidDocumentException {
+        Elements elements = doc.getElementsByClass("article__body-copy");
+        if (elements.size() != 1)
+            throw new InvalidDocumentException("Cannot find the body element");
+        return elements.first().html();
+    }
+}
+
 class DefaultFilter extends URLFilter {
 
     DefaultFilter() {
