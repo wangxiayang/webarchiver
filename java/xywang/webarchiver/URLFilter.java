@@ -213,7 +213,7 @@ class LTNFilter extends URLFilter {
 
     @Override
     String getTitle(Document doc) throws InvalidDocumentException {
-        Elements titlePrts = doc.getElementsByClass("whitecon articlebody");
+        Elements titlePrts = doc.getElementsByAttributeValue("itemprop", "articleBody");
         if (titlePrts.size() != 1)
             throw new InvalidDocumentException("Cannot locate the title element.");
 

@@ -234,6 +234,12 @@ class RetrieveArticleTask extends AsyncTask<String, String, String> {
                 hostname = hostname.substring(0, slashIdx);
                 imgURL = "https://" + hostname + imgURL;
                 enew.attr("src", imgURL);
+            } else if (!imgURL.startsWith("http")) {
+                String hostname = url.substring(8);
+                int slashIdx = hostname.indexOf("/");
+                hostname = hostname.substring(0, slashIdx);
+                imgURL = "https://" + hostname + "/" + imgURL;
+                enew.attr("src", imgURL);
             }
 
             publishProgress("[" + idx + "/" + es.size() + "] Downloading " + imgURL + ".");
